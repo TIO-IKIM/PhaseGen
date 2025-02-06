@@ -14,9 +14,10 @@ with $\psi$ being gaussian noise.
 
 This noise mainly influences the phase of the complex valued input $z$, but also partially the magnitude:
 
-$$
+$
 z_{noised} = z_0 \cdot \sqrt{\alpha} + \beta \cdot \sqrt{1-\alpha} 
-$$
+$
+
 with $\alpha_t:=1-\beta_t$.
 
 The model will then learn to predict the noise in each timestep.
