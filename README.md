@@ -23,12 +23,10 @@ For more detailed instructions, please find the documentation in each workpackag
 
 2. Create a conda environment with Python version 3.12.4 and install the necessary dependencies:
    
-       conda create -n my_env python=3.12.4 --file requirements.txt
-    In case of installation issues with conda, use pip install -r requirements.txt to install the dependecies.
-
-3. Activate your new environment:
-
+       cd PhaseGen
+       conda create -n my_env python=3.12.4
        conda activate my_env
+       pip install -r requirements.txt
 
 ## Roadmap
 
