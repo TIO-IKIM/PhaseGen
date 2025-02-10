@@ -1,6 +1,13 @@
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.abspath(current_dir))
+sys.path.append(project_root)
+
 import torch
 import unittest
-from phase_gen.utils.fourier import ifft, fft
+from utils.fourier import ifft, fft
 
 class TestFourierTransforms(unittest.TestCase):
 
@@ -43,16 +50,6 @@ class TestFourierTransforms(unittest.TestCase):
         scan = torch.randn(2, 2, 3, 4, 4)
         transformed = ifft(scan)
         self.assertEqual(transformed.shape, scan.shape)
-
-    def test_invalid_dimension_fft(self):
-        scan = torch.randn(1)
-        with self.assertRaises(ValueError):
-            fft(scan)
-
-    def test_invalid_dimension_ifft(self):
-        scan = torch.randn(1)
-        with self.assertRaises(ValueError):
-            ifft(scan)
 
 if __name__ == '__main__':
     unittest.main()

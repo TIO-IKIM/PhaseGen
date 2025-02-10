@@ -10,33 +10,12 @@ import models.layer.spectral_layer as parts
 
 
 class ResUNet(nn.Module):
-    """
-    ResUNet is a residual U-Net model for image processing tasks.
-
-    Attributes:
-        downs (nn.ModuleList): List of downsampling blocks.
-        bottleneck (nn.ModuleList): List of bottleneck blocks.
-        ups (nn.ModuleList): List of upsampling blocks.
-        pooling_size (int): Size of the pooling kernel.
-        pool (nn.Module): Pooling layer.
-        padding (int): Padding size.
-        kernel_size (int): Size of the convolutional kernel.
-        device (torch.device): Device to run the model on.
-        dropout (float): Dropout rate.
-        dilation (int): Dilation rate.
-        activation (nn.Module): Activation function.
-        res_length (int): Length of the residual blocks.
-        final_layer (nn.Conv2d): Final convolutional layer.
-    """
-
     def __init__(
         self,
         config: dict,
         features: list,
         device: torch.device | list[torch.device],
         activation: nn.Module,
-        padding: int = None,
-        dilation: int = 1,
         in_channels: int = 1,
         out_channels: int = 1,
     ) -> None:
@@ -48,8 +27,6 @@ class ResUNet(nn.Module):
             features (list): List of feature sizes for each block.
             device (torch.device | list[torch.device]): Device(s) to run the model on.
             activation (nn.Module): Activation function.
-            padding (int, optional): Padding size. Defaults to None.
-            dilation (int, optional): Dilation rate. Defaults to 1.
             in_channels (int, optional): Number of input channels. Defaults to 1.
             out_channels (int, optional): Number of output channels. Defaults to 1.
         """
@@ -58,14 +35,14 @@ class ResUNet(nn.Module):
         self.downs = nn.ModuleList()
         self.bottleneck = nn.ModuleList()
         self.ups = nn.ModuleList()
-        self.pooling_size = config["pooling_size"]
+        self.pooling_size = 2
         self.pool = parts.SpectralPool(kernel_size=self.pooling_size)
-        self.padding = padding
-        self.kernel_size = config["kernel_size"]
+        self.kernel_size = 3
+        self.padding = int((self.kernel_size - 1) / 2)
 
         self.device = device
         self.dropout = config["dropout"]
-        self.dilation = dilation
+        self.dilation = 1
         self.activation = activation
         conv = nn.Conv2d
         self.res_length = config["length"]

@@ -93,7 +93,7 @@ class Sampler:
         data_loader (DataLoader): Data loader for the given data list.
     """
 
-    def __init__(self, data_path, save_path, device, batch_size):
+    def __init__(self, data_path, save_path, model_path, device, batch_size):
         """
         Initializes the Sampler with the given parameters.
 
@@ -108,9 +108,9 @@ class Sampler:
         self.model_path = model_path
         self.device = device
         self.batch_size = batch_size
-        self.__get_data_list()
-        self.__load_model()
-        self.__get_data_loader()
+        self._get_data_list()
+        self._load_model()
+        self._get_data_loader()
 
     def _get_data_list(self):
         """
@@ -188,5 +188,5 @@ if __name__ == "__main__":
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    sampler = Sampler(data_path, save_path, device, 64)
+    sampler = Sampler(data_path, save_path, model_path, device, 64)
     sampler()

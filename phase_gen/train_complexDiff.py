@@ -7,7 +7,7 @@ import os
 import torch
 import argparse
 from pathlib import Path
-import models.cDiff_new as cDiff
+import models.cDiff as cDiff
 import torch.optim as optim
 from tqdm import tqdm
 from utils.IKIMLogger import IKIMLogger
@@ -90,9 +90,6 @@ class TrainNetwork:
             "pin_memory"
         ]  # Whether to pin memory during training or not (leads to higher efficiency in memory consumption)
         self.csv_path = config["csv_path"]
-        self.base_output: Path = (
-            Path.home() / config["base_output"]
-        )  # Base output path for validation etc.
         self.optim: str = config[
             "optimizer"
         ]  # Optimizer to be used for training (e.g. "Adam")
@@ -108,15 +105,14 @@ class TrainNetwork:
 
         TrainNetwork._init_activation(self, config)
 
-        TrainNetwork._init_network(self, config, logger)
+        TrainNetwork._init_network(self, config)
 
         self.model_name = (
-            f"{config['loss']}_"
             f"{config['lr']}_"
             f"l{config['length']}_{config['comment']}_{config['features']}"
         )
         self.save_base_folder: Path = (
-            Path(self.base_output) / f"train_{self.model_name}"
+            Path(config["base_output"]) / f"train_{self.model_name}"
         )  # Folder to save the validation images and checkpoints in
 
     def _init_network(self, config):
@@ -133,7 +129,6 @@ class TrainNetwork:
             activation=self.activation,
             in_channels=config["in_channel"],
             out_channels=config["out_channel"],
-            logger=logger,
         )
         if type(self.device) is not list:
             self.network.to(self.device)
@@ -172,7 +167,7 @@ class TrainNetwork:
         Returns:
             str: Comment for a logger or direct printing.
         """
-        return f"batch_size = {self.batch_size} loss = {self.loss} lr = {self.lr} kernel_size = {self.kernel_size} pooling_size = {self.pooling_size} {self.model_name}"
+        return f"batch_size = {self.batch_size} lr = {self.lr} {self.model_name}"
 
     @utilities.timer
     def train_fn(self) -> None:
@@ -203,6 +198,8 @@ class TrainNetwork:
             if args.tqdm == True:
                 loop.set_postfix(loss=loss.item())
 
+            break
+
         self.scheduler.step()
         self.total_loss = total_loss / len(self.train_loader)
 
@@ -228,6 +225,10 @@ class TrainNetwork:
                 num=self.val_num,
                 folder=self.save_folder,
             )
+        stop_metric = metrics['val_loss']
+        self.early_stopping(stop_metric)
+        if self.early_stopping.early_stop:
+            logger.info("Early stopping")
 
     @utilities.timer
     def __call__(self) -> None:
@@ -243,8 +244,8 @@ class TrainNetwork:
             self.save_folder = Path(self.save_base_folder) / f"fold_{self.fold_idx}"
             # Log save folder information
             logger.info(f"Save folder: {str(self.save_folder)}")
-            # Create save folder if it does not exist
             Path(self.save_folder).mkdir(parents=True, exist_ok=True)
+
 
             self.early_stopping = utilities.EarlyStopping(
                 patience=30,
@@ -264,7 +265,7 @@ class TrainNetwork:
                     f"{self.save_folder}/best_checkpoint.pth", map_location=self.device
                 )
             else:
-                self._init_network(self.config, logger)
+                self._init_network(self.config)
                 self.model = self.network
 
             # Log device information and model parameters
@@ -315,9 +316,6 @@ class TrainNetwork:
 
             torch.save(self.model, f"{Path(self.save_folder)}/last_checkpoint.pth")
 
-            break
-
-
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
     torch.backends.cuda.matmul.allow_tf32 = True
@@ -335,7 +333,7 @@ if __name__ == "__main__":
         level=args.log,
         log_dir="logs",
         comment=(
-            f"train_{config['loss']}_{config['activation']}_"
+            f"train_{config['activation']}_"
             f"p{config['dropout']}_{config['features']}_{config['lr']}_"
             f"{config['optimizer']}_l{config['length']}_{config['comment']}"
         ),
