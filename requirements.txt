@@ -1,8 +1,9 @@
 matplotlib
-numpy==2.2.2
-pandas==2.0.0
+numpy==1.26.4
+pandas==2.2.3
 PyYAML==6.0.2
 scikit_learn==1.6.1
 torch
 torchvision
 tqdm==4.65.0
+prettytable==3.14.0

@@ -25,9 +25,11 @@ For more detailed instructions, please find the documentation in each workpackag
    
        cd PhaseGen
        conda create -n my_env python=3.12.4
-       conda activate my_env
-       pip install -r requirements.txt
-
+      ```        
+      conda activate my_env
+      pip install -r requirements.txt
+      ```
+      
 ## Roadmap
 
 ## Citation

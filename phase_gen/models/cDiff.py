@@ -12,7 +12,6 @@ class PhaseDiffusionUNet(ResUNet):
         features,
         device,
         activation,
-        padding=None,
         dilation: int = 1,
         in_channels: int = 2,
         out_channels: int = 1,
@@ -26,7 +25,6 @@ class PhaseDiffusionUNet(ResUNet):
             features (int): Number of features.
             device (torch.device): Device to run the model on.
             activation (str): Activation function.
-            padding (str, optional): Padding type. Defaults to None.
             dilation (int, optional): Dilation rate. Defaults to 1.
             in_channels (int, optional): Number of input channels. Defaults to 2.
             out_channels (int, optional): Number of output channels. Defaults to 1.
@@ -37,8 +35,6 @@ class PhaseDiffusionUNet(ResUNet):
             features,
             device,
             activation,
-            padding,
-            dilation,
             in_channels,
             out_channels,
         )
@@ -64,8 +60,6 @@ class PhaseDiffusionUNet(ResUNet):
             features,
             device,
             activation,
-            padding,
-            dilation,
             in_channels,
             out_channels,
         )
@@ -131,7 +125,7 @@ class PhaseDiffusionUNet(ResUNet):
         x_t = self._forward_diffusion(x, t, noise)
         pred_noise = self.model(torch.cat([x_t, x.abs()], dim=1), t)
 
-        loss = self.loss_fn(pred_noise, noise, x_t, x)
+        loss = self.loss_fn(pred_noise, noise)
 
         return loss
 

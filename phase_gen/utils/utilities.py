@@ -11,6 +11,7 @@ import functools
 import time
 import random
 import torch.nn.functional as F
+from prettytable import PrettyTable
 
 
 class EarlyStopping(object):
@@ -48,7 +49,7 @@ class EarlyStopping(object):
         self.logger = logger
 
         if self.op_type == "min":
-            self.val_score_min = np.Inf
+            self.val_score_min = np.inf
         else:
             self.val_score_min = 0
 
@@ -69,6 +70,7 @@ class EarlyStopping(object):
             )
             if self.counter >= self.patience:
                 self.early_stop = True
+            self.save = False
 
     def print_and_update(self, val_score):
         """print_message when validation score decrease."""
@@ -230,3 +232,22 @@ def padding(pooled_input, original):
     padded = F.pad(pooled_input, (pad_w_left, pad_w_right, pad_h_top, pad_h_bottom))
 
     return padded
+
+def count_parameters(model: torch.nn.Module) -> tuple[PrettyTable, int]:
+    """Counts the model parameters.
+
+    Args:
+        model (torch.nn.Module): a torch model
+
+    Returns:
+        int: number of model parameters
+    """
+    table = PrettyTable(["Modules", "Parameters"])
+    total_params = 0
+    for name, parameter in model.named_parameters():
+        if not parameter.requires_grad:
+            continue
+        param = parameter.numel()
+        table.add_row([name, param])
+        total_params += param
+    return table, total_params
