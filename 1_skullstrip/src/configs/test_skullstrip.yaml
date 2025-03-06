@@ -1,0 +1,16 @@
+base_path: k-Strip/output            # Base path for testing
+save_path: k-Strip/output/testing    # Output path for model testing
+
+test_path: path/to/test_data         # Path to testing data
+model_path: k-Strip/output/your_trained_model/model.h5       # Path of model
+config_path: k-Strip/output/your_trained_model/config.yaml   # Path of config file used for training
+
+transformation:     # Transformation to be applied
+
+perc: [1.7, 3.7, 5]           # Percentage values to be iterated through (used for thresholding)
+num_zero: [1000, 3000, 5]     # Minimum amount of pixel used for metric calculation
+filenum: 1                    # Number of files per saved example
+num_workers: 8
+num_threads: 8
+
+pin_memory: True
