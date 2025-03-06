@@ -1,0 +1,33 @@
+activation: relu
+alpha: 2
+augmentation: null
+base_output: /home/jovyan/k-radiomics-storage/k-radiomics/mri-recon/output
+batch_size: 128
+comment: 8_rssgt_normy_naive
+single_coil: true
+image_domain: true
+csv_path: 
+dilation: 1
+dropout: 0.1
+features:
+- 4
+- 8
+- 16
+- 32
+in_channel: 1
+kernel_size: 3
+length: 1
+loss: l1
+lr: 0.0005
+model: resunet
+num_threads: 8
+num_workers: 8
+optimizer: AdamW
+out_channel: 1
+pin_memory: true
+pooling_size: 2
+test_split: 0.8
+transformation: scaling
+val_num: 4
+train_path: /home/jovyan/radiology/fastmri_knee/singlecoil_train_pt_naive
+val_path: /home/jovyan/radiology/fastmri_knee/singlecoil_val_pt_naive
