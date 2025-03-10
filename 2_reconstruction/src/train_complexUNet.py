@@ -8,7 +8,6 @@ import torch
 import argparse
 from pathlib import Path
 import models.cResUNet as RESUNET
-import models.unet as UNET
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
@@ -255,7 +254,6 @@ class Trainer:
         """
         network_classes = {
             "resunet": RESUNET.ResUNet,
-            "unet": UNET.UNet,
         }
         network_class = network_classes.get(config["model"])
         if network_class is None:
@@ -323,9 +321,6 @@ class Trainer:
             "cardioid": A.ComplexCardioid,
             "amprelu": A.AmplitudeRelu,
             "prelu": A.ComplexPReLU,
-            "phasesensitive": A.PhaseSensitiveReLU,
-            "sin": A.SineReLU,
-            "linear": A.Linear,
         }
         selected_activation = config["activation"]
         assert (
@@ -450,11 +445,6 @@ class Trainer:
                 targets = targets.to(device=predictions.device)
                 predictions = predictions.abs()
                 val_loss += self.loss(predictions.abs(), targets).item()
-                # mean = scales["mean"].to(self.device).view(-1, 1, 1, 1)
-                # std = scales["std"].to(self.device).view(-1, 1, 1, 1)
-                # predictions = predictions * std + mean
-                # targets = targets * std + mean
-                # targets = targets.abs()
                 if self.image_domain:
                     data = data.abs().cpu().numpy()
                     predictions = predictions.cpu().numpy()

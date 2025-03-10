@@ -293,7 +293,6 @@ class ResidualBlock(nn.Module):
         self.activation = activation()
         if dim == 2:
             Conv = nn.Conv2d
-            #Conv = S.FFTConv
         elif dim == 3:
             Conv = nn.Conv3d
 
@@ -397,11 +396,9 @@ class Upsampling(nn.Module):
         image_domain: bool = False,
     ):
         super(Upsampling, self).__init__()
-        #self.upsampling = nn.Upsample(scale_factor=scale_factor)
         self.upsampling = S.SpectralUpsampling(image_domain)
         if dim == 2:
             Conv = nn.Conv2d
-            #Conv = S.FFTConv
         elif dim == 3:
             Conv = nn.Conv3d
 

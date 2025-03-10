@@ -1,7 +1,6 @@
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 import numpy as np
 from typing import Optional
-import piqa
 import json
 
 
@@ -13,6 +12,7 @@ def mse(gt: np.ndarray, pred: np.ndarray) -> np.ndarray:
 def nmse(gt: np.ndarray, pred: np.ndarray) -> np.ndarray:
     """Compute Normalized Mean Squared Error (NMSE)"""
     return np.array(np.linalg.norm(gt - pred) ** 2 / np.linalg.norm(gt) ** 2)
+
 
 def nrmse(gt: np.ndarray, pred: np.ndarray) -> np.ndarray:
     """Compute Normalized Root Mean Squared Error (NRMSE)"""
@@ -28,18 +28,14 @@ def psnr(
     return peak_signal_noise_ratio(gt, pred, data_range=maxval)
 
 
-# def ssim(gt, pred):
-#     """Compute Structural Similarity Index Metric (SSIM)"""
-#     _ssim = piqa.SSIM(n_channels=gt.shape[1]).to(gt.device)
-    
-#     return _ssim(gt, pred)
+def ssim(
+    gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None
+) -> np.ndarray:
 
-def ssim(gt: np.ndarray, pred: np.ndarray, maxval: Optional[float]=None) -> np.ndarray:
-    
     maxval = gt.max() if maxval is None else maxval
-    
+
     return structural_similarity(gt, pred, data_range=maxval)
-    
+
 
 class ReconstructionEvaluation:
     """
@@ -75,18 +71,15 @@ class ReconstructionEvaluation:
     @staticmethod
     def _normalize(gt: np.ndarray, pred: np.ndarray):
 
-        # _min = gt.min()
-        # _max = gt.max()
-        # gt = (gt - _min) / (_max - _min)
-        # pred = (pred - _min) / (_max - _min)
         gt = (gt - gt.min()) / (gt.max() - gt.min())
         pred = (pred - pred.min()) / (pred.max() - pred.min())
 
         return gt, pred
 
-    def _compute_metrics(self, gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None):
-        #self.metrics["ssim"].append(ssim(gt.unsqueeze(dim=0), pred.unsqueeze(dim=0)).cpu())
-        
+    def _compute_metrics(
+        self, gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None
+    ):
+
         maxval = gt.max() if maxval is None else maxval
         gt = gt.squeeze()
         pred = pred.squeeze()
@@ -94,7 +87,7 @@ class ReconstructionEvaluation:
         self.metrics["psnr"].append(psnr(gt, pred))
         self.metrics["mse"].append(mse(gt, pred))
         self.metrics["nrmse"].append(nrmse(gt, pred).item())
-        
+
     def _save_metrics(self, filename="metrics.json"):
         """Save all computed metrics to a JSON file."""
         metrics_to_save = {k: np.array(v).tolist() for k, v in self.metrics.items()}
@@ -123,10 +116,10 @@ class ReconstructionEvaluation:
             self._compute_metrics(gt, pred)
 
     def __getitem__(self, key):
-        
+
         if self.verbose:
             self._save_metrics()
-            
+
         if key == "all":
             return {k: np.array(v).mean() for k, v in self.metrics.items()}
         else:

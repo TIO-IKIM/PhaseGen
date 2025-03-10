@@ -72,7 +72,6 @@ class ResUNet(nn.Module):
         self.dilation = dilation
         self.activation = activation
         Conv = nn.Conv2d
-        #Conv = parts.FFTConv
         self.res_length = config["length"]
 
         # Create downsampling blocks
@@ -166,7 +165,6 @@ class ResUNet(nn.Module):
                 device=self.device,
                 dtype=torch.cfloat
             ),
-            #nn.Sigmoid(),
         )
         
     def get_mask(self, x_in):
@@ -235,7 +233,6 @@ class ResUNet(nn.Module):
         cut_offs = cut_offs[::-1]
         if self.consistency:
             x_in_list = x_in_list[::-1]
-            # x = self.data_consistency(x, x_in_list[0])
 
         # Upsample blocks
         for idx in range(0, len(self.ups), 2):
@@ -250,16 +247,6 @@ class ResUNet(nn.Module):
 
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.ups[idx + 1](concat_skip)
-            # if self.consistency:
-            #     x = self.data_consistency(x, x_in_list[(idx//2)+1])
-        #x = self.data_consistency(x, x_in_list[-1])
-
-        # if self.image_domain:
-        #     x = x.abs()
-        # else:
-        #     x = ifft(x).abs()
-         
-        # Final layer
         x = self.final_layer(x)
 
         return x
