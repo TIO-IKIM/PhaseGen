@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import yaml
 import models.layer.activations as A
-import models.cDiff_new as cDiff
+import models.cDiff as cDiff
 from utils.create_dataset import get_loaders, Folds
 import argparse
 import os

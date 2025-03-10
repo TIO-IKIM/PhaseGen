@@ -57,13 +57,6 @@ parser.add_argument(
     help="Continue from best checkpoint.",
 )
 
-parser.add_argument(
-    "--load_checkpoint",
-    type=str,
-    default=None,
-    help="Load checkpoint by giving path to checkpoint. Defaults to None.",
-)
-
 ID = wandb.util.generate_id()
 
 
