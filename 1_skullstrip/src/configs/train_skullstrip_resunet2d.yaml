@@ -1,0 +1,29 @@
+model: resunet      # Model to be used (at the moment only resunet available).
+train_path: path/to/train_data         # Path to training data.
+val_path: path/to/val_data             # Path to validation data.
+in_channel: 1       # Number of input channels (e.g. 1 for grey-scale, 3 for rgb).
+out_channel: 1      # Number of output channels.
+base_output: k-Strip/output/training   # Base output path for saving of results.
+transformation:     # Transformation to be applied (e.g. "standardization").
+augmentation: complex_augmentation     # Augmentation to be applied (e.g. "complex augmentation").
+loss: l1            # loss to be used, check losses.py or _init_loss for available loss functions.
+optimizer: Adam     # Optimizer to be used, implemented optimizers are "AdamW", "Adam", "SGD".
+activation: relu    # Activation function to be used, check activations.py or _init_activation for available activation functions.
+length: 3           # Number of conescutive residual blocks in each layer in the UNet structure.
+features:           # Number of features in down- / upsampling path
+- 32
+- 64
+- 128
+alpha: 2            # alpha value in case of logarithmic l1 loss.
+lr: 1.0e-04
+dropout: 0.1
+batch_size: 32
+test_split: 0.8     # train-validation-split
+num_workers: 8      # workers used by dataloader
+num_threads: 8      # number of threads used by the script
+kernel_size: 3
+pooling_size: 2
+dilation: 1
+val_num: 4          # Number of examples plotted for validation
+pin_memory: true
+comment:            # Freeform to give additional context to saving file.
