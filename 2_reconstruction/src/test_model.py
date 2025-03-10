@@ -14,15 +14,13 @@ parser.add_argument(
     type=str,
     required=False,
     default="zerofilling",
-    #default="/home/jovyan/k-radiomics-storage/k-radiomics/mri-recon/output/resunet_l1_relu_scaling_p0.3_[16, 32, 64, 128]_0.0002_Adam_l1_consistency_genphase",
     help="Path to the model to be tested. If None is selected, zerofilling will be tested.",
 )
 parser.add_argument(
     "-i",
     "--data_path",
     type=str,
-    required=False,
-    default="/home/jovyan/radiology/fastmri_knee/singlecoil_test_pt",
+    required=True,
     help="Path to the test data.",
 )
 
@@ -93,10 +91,6 @@ class ModelTester:
                         kspace_undersampled.to(self.device),
                     )
                     output = self.model(data, kspace_undersampled)
-                    # mean = scales["mean"].to(self.device).view(-1, 1, 1, 1)
-                    # std = scales["std"].to(self.device).view(-1, 1, 1, 1)
-                    # output = (output * std + mean).abs().cpu().numpy()
-                    # target = (target * std + mean).abs().cpu().numpy()
                     self.validator(output.abs().cpu().numpy(), target.cpu().numpy())
         else:
             logging.info("Testing zerofilling")
@@ -106,10 +100,6 @@ class ModelTester:
         for data, target, _, scales in self.test_loader:
             if self.image_domain is False:
                 data = ifft(data)
-            mean = scales["mean"].view(-1, 1, 1, 1).to("cpu")
-            std = scales["std"].view(-1, 1, 1, 1).to("cpu")
-            #data = (data * std + mean).abs().cpu().numpy()
-            #target = (target * std + mean).abs().cpu().numpy()
             self.validator(data.abs().cpu().numpy(), target.numpy())
 
     def report(self):

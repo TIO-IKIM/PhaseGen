@@ -28,8 +28,8 @@ def process_file(file, gen_data_list, save_path):
         
 if __name__ == "__main__":
     
-    input_path = "/home/jovyan/radiology/fastmri_knee/singlecoil_train_pt"
-    save_path = "/home/jovyan/radiology/fastmri_knee/singlecoil_train_pt_naive"
+    input_path = "/path/to/input"
+    save_path = "/path/to/save"
     
     data_list, gen_data_list = get_files(
         input_path=input_path,

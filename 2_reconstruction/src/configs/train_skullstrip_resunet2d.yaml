@@ -1,9 +1,9 @@
 activation: relu
 alpha: 2
 augmentation: null
-base_output: /home/jovyan/k-radiomics-storage/k-radiomics/mri-recon/output
+base_output: path/to/output_dir
 batch_size: 128
-comment: 8_rssgt_normy_naive
+comment: 
 single_coil: true
 image_domain: true
 csv_path: 
@@ -29,5 +29,5 @@ pooling_size: 2
 test_split: 0.8
 transformation: scaling
 val_num: 4
-train_path: /home/jovyan/radiology/fastmri_knee/singlecoil_train_pt_naive
-val_path: /home/jovyan/radiology/fastmri_knee/singlecoil_val_pt_naive
+train_path: /path/to/train_data
+val_path: /path/to/val_data
