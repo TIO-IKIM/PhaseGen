@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import datetime
 from typing import Literal, Union
 from pathlib import Path

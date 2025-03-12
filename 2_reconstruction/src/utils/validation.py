@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 import numpy as np
 from typing import Optional
@@ -31,7 +36,6 @@ def psnr(
 def ssim(
     gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None
 ) -> np.ndarray:
-
     maxval = gt.max() if maxval is None else maxval
 
     return structural_similarity(gt, pred, data_range=maxval)
@@ -70,7 +74,6 @@ class ReconstructionEvaluation:
 
     @staticmethod
     def _normalize(gt: np.ndarray, pred: np.ndarray):
-
         gt = (gt - gt.min()) / (gt.max() - gt.min())
         pred = (pred - pred.min()) / (pred.max() - pred.min())
 
@@ -79,7 +82,6 @@ class ReconstructionEvaluation:
     def _compute_metrics(
         self, gt: np.ndarray, pred: np.ndarray, maxval: Optional[float] = None
     ):
-
         maxval = gt.max() if maxval is None else maxval
         gt = gt.squeeze()
         pred = pred.squeeze()
@@ -95,7 +97,6 @@ class ReconstructionEvaluation:
             json.dump(metrics_to_save, f, indent=4)
 
     def __call__(self, pred: np.ndarray, gt: np.ndarray):
-
         assert (
             gt.shape == pred.shape
         ), "Ground truth and prediction must have same shape."
@@ -116,7 +117,6 @@ class ReconstructionEvaluation:
             self._compute_metrics(gt, pred)
 
     def __getitem__(self, key):
-
         if self.verbose:
             self._save_metrics()
 

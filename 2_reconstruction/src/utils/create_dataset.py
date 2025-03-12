@@ -13,6 +13,7 @@ from utils.fourier import ifft, fft
 from utils.transforms import apply_mask
 import utils.subsample as subsample
 
+
 class CreateDataset:
     def __init__(
         self,
@@ -43,7 +44,7 @@ class CreateDataset:
         """
         return len(self.file_list)
 
-    @staticmethod 
+    @staticmethod
     def __load_tensor(path):
         """
         Load a tensor from a given path.
@@ -63,40 +64,43 @@ class CreateDataset:
         self.data = self.__load_tensor(self.file_list[idx])
         if isinstance(self.data, dict):
             self.x = self.data["kspace"]
-        else: 
+        else:
             self.x = self.data
         self.y = self.data["reconstruction_rss"][None, ...]
-        
+
         self.x = self.x.cfloat()
-        
+
         if torch.isnan(self.x).any():
             self.x[torch.isnan(self.x)] = 0
-        
+
         if self.single_coil:
             self.x = self.x.unsqueeze(0)
-                
+
         if self.x.shape[-2:-1] != [320, 320]:
             self.reshape()
-                            
-        if self.train:         
-            CreateDataset.undersample(self, center_fractions=[0.04], accelerations=self.accelerations) 
+
+        if self.train:
+            CreateDataset.undersample(
+                self, center_fractions=[0.04], accelerations=self.accelerations
+            )
         else:
-            CreateDataset.undersample(self, center_fractions=[0.04], accelerations=[self.accelerations[-1]])
-        
+            CreateDataset.undersample(
+                self, center_fractions=[0.04], accelerations=[self.accelerations[-1]]
+            )
+
         kspace_undersampled = self.x
         if self.image_domain:
             self.x = ifft(self.x)
         self.x, x_std, x_mean = CreateDataset.scaling(self.x)
         self.y, y_std, y_mean = CreateDataset.scaling(self.y)
-        
+
         self.y = (self.y - self.y.min()) / (self.y.max() - self.y.min())
-        
+
         scales = {"mean": x_mean, "std": x_std}
 
         return self.x, self.y, kspace_undersampled, scales
-    
-    def reshape(self):
 
+    def reshape(self):
         image = ifft(self.x)
         image_real = image.real
         image_imag = image.imag
@@ -106,7 +110,6 @@ class CreateDataset:
 
         self.x = fft(image_real + 1j * image_imag)
 
-
     @staticmethod
     def scaling(data) -> torch.tensor:
         """
@@ -115,7 +118,7 @@ class CreateDataset:
         x_std = data.std()
         x_mean = data.mean()
         data = (data - x_mean) / (x_std + 1e-13)
-            
+
         return data, x_std, x_mean
 
     @staticmethod
@@ -124,8 +127,10 @@ class CreateDataset:
         Normalize the input data.
         """
         return (input - input.min()) / (input.max() - input.min())
-    
-    def undersample(self, center_fractions: list[float], accelerations: list[int]) -> None:
+
+    def undersample(
+        self, center_fractions: list[float], accelerations: list[int]
+    ) -> None:
         """
         Undersample the input data.
         """
@@ -134,18 +139,18 @@ class CreateDataset:
             accelerations=accelerations,
             allow_any_combination=False,
         )
-        
+
         # Change data dimensions for undersampling: last dimension is 2 (real and imaginary)
         self.x = torch.stack([self.x.real, self.x.imag], dim=-1)
-        
+
         kspace_masked = apply_mask(self.x, mask_func)
-        
+
         self.x = kspace_masked[0]
-        
+
         # Change data dimensions back to original shape
         self.x = self.x[..., 0] + 1j * self.x[..., 1]
 
-        
+
 def get_loaders(
     save_path: str,
     train_path: str = None,
@@ -218,7 +223,7 @@ def get_loaders(
         "batch_size": batch_size,
         "num_workers": num_workers,
         "pin_memory": pin_memory,
-        "prefetch_factor": 2
+        "prefetch_factor": 2,
     }
 
     train_loader = DataLoader(train_ds, shuffle=True, **loader_params)
@@ -230,6 +235,7 @@ def get_loaders(
         )
 
     return train_loader, val_loader, (len(train_ds) + len(val_ds))
+
 
 def get_test_loader(
     data_path: str,
@@ -253,13 +259,19 @@ def get_test_loader(
     """
     DatasetClass = CreateDataset
 
-    test_ds = DatasetClass(data_path=data_path, train=False, single_coil=single_coil, image_domain=image_domain, standardize=standardize)
+    test_ds = DatasetClass(
+        data_path=data_path,
+        train=False,
+        single_coil=single_coil,
+        image_domain=image_domain,
+        standardize=standardize,
+    )
 
     loader_params = {
         "batch_size": batch_size,
         "num_workers": num_workers,
         "pin_memory": True,
-        "prefetch_factor": 2
+        "prefetch_factor": 2,
     }
 
     test_loader = DataLoader(test_ds, shuffle=False, **loader_params)

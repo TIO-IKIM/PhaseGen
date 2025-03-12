@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import torch
 import os
 from tqdm import tqdm
@@ -45,7 +50,6 @@ class CreateDataset:
         self.data_path = data_path
 
     def __len__(self):
-
         return len(self.data_path)
 
     def __getitem__(self, idx):
@@ -180,7 +184,6 @@ class Sampler:
 
 
 if __name__ == "__main__":
-
     args = argparser.parse_args()
     model_path = args.model_path
     data_path = args.data_path

@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import torch
 from pathlib import Path
 from utils.create_dataset import get_test_loader
@@ -113,7 +118,6 @@ class ModelTester:
 
 
 if __name__ == "__main__":
-
     args = parser.parse_args()
     ikim_logger = IKIMLogger(
         level="INFO",

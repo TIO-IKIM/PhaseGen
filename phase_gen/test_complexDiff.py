@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import torch
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -7,6 +12,7 @@ import models.cDiff as cDiff
 from utils.create_dataset import get_loaders, Folds
 import argparse
 import os
+
 
 class PhaseGenTester:
     """
@@ -19,7 +25,8 @@ class PhaseGenTester:
         device (torch.device): Device to run the model on.
         config (dict): Configuration dictionary.
     """
-    def __init__(self, model_path, checkpoint_path=None, save_path: str=None):
+
+    def __init__(self, model_path, checkpoint_path=None, save_path: str = None):
         self.model_path = model_path
         self.checkpoint_path = checkpoint_path
         self.save_path = save_path
@@ -108,13 +115,22 @@ class PhaseGenTester:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PhaseGenTester")
     parser.add_argument(
-        "-m", "--model_path", type=str, required=True, help="Path to the model directory"
+        "-m",
+        "--model_path",
+        type=str,
+        required=True,
+        help="Path to the model directory",
     )
     parser.add_argument(
-        "-c", "--checkpoint_path", type=str, required=False, help="Path to the checkpoint file"
+        "-c",
+        "--checkpoint_path",
+        type=str,
+        required=False,
+        help="Path to the checkpoint file",
     )
     parser.add_argument(
-        "-o", "--save_path", type=str, required=True, help="Path to the save directory")
+        "-o", "--save_path", type=str, required=True, help="Path to the save directory"
+    )
 
     args = parser.parse_args()
 

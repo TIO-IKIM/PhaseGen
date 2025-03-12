@@ -373,7 +373,6 @@ class SpectralPool(nn.Module):
             # Calculate saved_cut_off
             saved_cut_off = input - padded_output
 
-        
         return FFT.ifft(pooled_input), FFT.ifft(saved_cut_off)
         # return pooled_input, saved_cut_off
 

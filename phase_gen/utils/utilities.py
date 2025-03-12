@@ -233,6 +233,7 @@ def padding(pooled_input, original):
 
     return padded
 
+
 def count_parameters(model: torch.nn.Module) -> tuple[PrettyTable, int]:
     """Counts the model parameters.
 

@@ -308,44 +308,42 @@ class L1NormAbsLoss(nn.Module):
         target_norm = transforms.tensor_normalization(target)
 
         return self.l1(output_norm, target_norm)
-    
+
 
 class CombinedLoss(nn.Module):
-    
     def __init__(self):
         super().__init__()
         self.l1 = nn.L1Loss()
 
     def forward(self, output, target):
-
         kspace_loss = self.l1(output, target)
         image_loss = self.l1(FFT.ifft(output), FFT.ifft(target))
 
         return kspace_loss + image_loss * 100
+
 
 class SSIMLoss(nn.Module):
     def __init__(self, normalize=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.normalize = normalize
 
-    def forward(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor: 
-        
+    def forward(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         assert output.dtype != torch.cfloat, "Output must be in image space"
 
         if self.normalize:
             output, target = utilities.normalize(output, target)
-                            
+
         return 1 - ssim(target, output)
-    
+
+
 class SSIML1Loss(nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.l1 = nn.L1Loss()
         self.ssim = SSIMLoss()
-    
+
     def forward(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        
         l1_loss = self.l1(target, output)
         ssim_loss = self.ssim(target, output)
-        
+
         return l1_loss * 1 + ssim_loss

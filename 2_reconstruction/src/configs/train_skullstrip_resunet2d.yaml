@@ -3,10 +3,10 @@ alpha: 2
 augmentation: null
 base_output: path/to/output_dir
 batch_size: 128
-comment: 
+comment:
 single_coil: true
 image_domain: true
-csv_path: 
+csv_path:
 dilation: 1
 dropout: 0.1
 features:

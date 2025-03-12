@@ -359,22 +359,24 @@ class SpectralPool(nn.Module):
               output.
         """
         # input = fft(input)
-        
+
         if input.ndim == 4:
             # 2D slices (B, C, H, W)
             cut_off = int(math.ceil(input.size(3) // self.kernel_size))
 
             # Use torchvision's CenterCrop for pooling
-            pooled_input = T.CenterCrop(size=(cut_off, cut_off))(input.real) + 1j * T.CenterCrop(size=(cut_off, cut_off))(input.imag)
+            pooled_input = T.CenterCrop(size=(cut_off, cut_off))(
+                input.real
+            ) + 1j * T.CenterCrop(size=(cut_off, cut_off))(input.imag)
 
             # Pad pooled_input with zeros to match the size of input
             padded_output = u.padding(pooled_input, input)
 
             # Calculate saved_cut_off
             saved_cut_off = input - padded_output
-            
+
         # pooled_input = ifft(pooled_input)
-            
+
         # TO-DO:
         # Implement new pooling for Volumes
 
@@ -457,6 +459,7 @@ def complex_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
 
     return c
 
+
 def fft_conv(
     signal,
     kernel,
@@ -477,63 +480,79 @@ def fft_conv(
         torch.Tensor: Output tensor of shape (B, out_channels, H, W) after applying the convolution.
     """
     B, C, H, W = signal.shape
-    #out_channels, _, Hk, Wk = kernel.shape
+    # out_channels, _, Hk, Wk = kernel.shape
     out_channels, in_channels, Hk, Wk = kernel.shape
-    
+
     # Calculate padded size (minimum size to avoid wrapping effects)
     padded_H = H + Hk - 1
     padded_W = W + Wk - 1
 
     # Pad kernel to match signal's spatial dimensions
-    kernel_padded = torch.zeros(out_channels, in_channels, padded_H, padded_W, device=kernel.device, dtype=kernel.dtype)
+    kernel_padded = torch.zeros(
+        out_channels,
+        in_channels,
+        padded_H,
+        padded_W,
+        device=kernel.device,
+        dtype=kernel.dtype,
+    )
     kernel_padded[:, :, :Hk, :Wk] = kernel
     kernel = torch.ops.aten.fft_fft2(kernel_padded)
     kernel = torch.ops.aten.fft_fftshift(kernel)
     kernel = kernel / (kernel.std() + 1e-10)
-    
+
     # Expand kernel_fft to batch dimension
-    kernel = kernel.unsqueeze(0).expand(B, -1, -1, -1, -1)  # [B, out_channels, in_channels, H, W]
-    signal_padded = torch.zeros(B, C, padded_H, padded_W, device=signal.device, dtype=signal.dtype)
+    kernel = kernel.unsqueeze(0).expand(
+        B, -1, -1, -1, -1
+    )  # [B, out_channels, in_channels, H, W]
+    signal_padded = torch.zeros(
+        B, C, padded_H, padded_W, device=signal.device, dtype=signal.dtype
+    )
     signal_padded[:, :, :H, :W] = signal
     signal = signal_padded.unsqueeze(1)  # [B, 1, C, H, W]
     signal = (signal * kernel).sum(dim=2)
-        
+
     # Crop result back to original size
     signal = signal[:, :, :H, :W]
-    
+
     if bias is not None:
         signal += bias.view(1, -1, 1, 1)
 
     return signal / (signal.std() + 1e-10)
 
+
 class FFTConv(nn.Module):
     """
     A class to perform convolution in the frequency domain using Fast Fourier Transform (FFT).
-    
+
     Attributes:
         weight : torch.nn.Parameter
             The convolutional weights.
         bias : torch.nn.Parameter or None
             The bias term, if applicable.
-            
+
     Methods:
         __init__(in_channels, out_channels, kernel_size, bias):
             Initializes the FFTConv layer with the given parameters.
         __call__(signal):
             Applies the FFT-based convolution to the input signal.
     """
+
     def __init__(self, in_channels, out_channels, kernel_size, bias, **kwargs):
         super(FFTConv, self).__init__()
-        
-        weight = torch.randn(out_channels, in_channels, kernel_size, kernel_size, dtype=torch.cfloat)
-        
+
+        weight = torch.randn(
+            out_channels, in_channels, kernel_size, kernel_size, dtype=torch.cfloat
+        )
+
         self.weight = nn.Parameter(weight)
-        #self.bias = nn.Parameter(torch.randn(out_channels, dtype=torch.cfloat)) if bias else None
+        # self.bias = nn.Parameter(torch.randn(out_channels, dtype=torch.cfloat)) if bias else None
         self.bias = None
-        
+
     def forward(self, signal):
         return fft_conv(signal, self.weight, self.bias)
-    
+
+
 class SpectralUpsampling(nn.Module):
     def __init__(self, image_domain: bool = False):
         """
@@ -584,7 +603,7 @@ class SpectralUpsampling(nn.Module):
 
         # Perform upsampling (element-wise addition)
         output = padded_input + cut_off
-        
+
         if self.image_domain:
             output = ifft(output)
 

@@ -287,7 +287,7 @@ class ResidualBlock(nn.Module):
         dilation: int = 1,
         activation: nn.Module = ComplexReLU(),
         resample=False,
-        embedding=False
+        embedding=False,
     ) -> None:
         super(ResidualBlock, self).__init__()
 
@@ -360,7 +360,9 @@ class ResidualBlock(nn.Module):
         residual = self.residual(x)
         out = self.conv1(x)
         if self.embedding:
-            out = out + self.emb(t)[:, :, None, None].repeat(1, 1, x.shape[-2], x.shape[-1])
+            out = out + self.emb(t)[:, :, None, None].repeat(
+                1, 1, x.shape[-2], x.shape[-1]
+            )
         out = self.conv2(out)
         out += residual
         out = self.activation(out)

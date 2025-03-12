@@ -1,6 +1,6 @@
 # Complex Valued Diffusion for MRI phase generation
 
-This is the implementation of a complex valued Diffusion model for the generation of MRI phase data in the image domain, dependent on the magnitude image. 
+This is the implementation of a complex valued Diffusion model for the generation of MRI phase data in the image domain, dependent on the magnitude image.
 
 The model utilizes the underlying cResUNet architecture used for k-Strip with an additional positional embedding for the diffusion timesteps _t_.
 
@@ -10,12 +10,12 @@ The model utilizes the underlying cResUNet architecture used for k-Strip with an
 
 The model will inject complex valued noise in the form of
 $$\beta = 1 \cdot e^{i \angle\psi}$$
-with $\psi$ being gaussian noise. 
+with $\psi$ being gaussian noise.
 
 This noise mainly influences the phase of the complex valued input $z$, but also partially the magnitude:
 
 $$
-z_{noised} = z_0 \cdot \sqrt{\alpha} + \beta \cdot \sqrt{1-\alpha} 
+z_{noised} = z_0 \cdot \sqrt{\alpha} + \beta \cdot \sqrt{1-\alpha}
 $$
 
 with $\alpha_t:=1-\beta_t$.
@@ -60,5 +60,3 @@ python sample_phase.py [flag]
 | `-m`                | str  | `None`                | Path to the model directory.                            |
 | `-i`                | str  | `None`                | Path to the data directory. Data needs to be in .pt or .npy format.  |
 | `-p`                | str  | `None`                | Path to the save directory. tqdm.              |
-
-

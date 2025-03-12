@@ -401,7 +401,7 @@ class Trainer:
 
             if args.tqdm == True:
                 loop.set_postfix(loss=loss.item())
-                                                                                                
+
         self.scheduler.step()
         self.total_loss = total_loss / len(self.train_loader)
 
@@ -429,7 +429,9 @@ class Trainer:
         plot_idx = random.randint(0, len(self.val_loader))
 
         with torch.no_grad():
-            for batch_idx, (data, targets, kspace_undersampled, scales) in enumerate(self.val_loader):
+            for batch_idx, (data, targets, kspace_undersampled, scales) in enumerate(
+                self.val_loader
+            ):
                 data = data.to(device=self.device, dtype=torch.complex64)
                 kspace_undersampled = kspace_undersampled.to(
                     device=self.device, dtype=torch.complex64
@@ -445,13 +447,18 @@ class Trainer:
                     data = ifft(data).abs().cpu().numpy()
                     predictions = ifft(predictions).cpu().numpy()
                 targets = targets.cpu().numpy()
-                    
+
                 validator(predictions, targets)
 
                 if batch_idx == plot_idx and self.epoch % 1 == 0:
                     if self.single_coil:
                         utilities.plot_singlecoil_example(
-                            data, targets, predictions, self.epoch, self.save_folder, self.image_domain
+                            data,
+                            targets,
+                            predictions,
+                            self.epoch,
+                            self.save_folder,
+                            self.image_domain,
                         )
                     else:
                         utilities.plot_multicoil_example(
@@ -532,7 +539,7 @@ class Trainer:
             pin_memory=self.pin_memory,
             log=logger,
             single_coil=self.single_coil,
-            image_domain=self.image_domain
+            image_domain=self.image_domain,
         )
 
         # Log save folder information

@@ -1,6 +1,6 @@
 ## Package content & structure
 
-This package includes the code for the reconstruction task. We use a complex valued neural network based on the k-Strip architecture. Additionally, we implemented a data consistency layer in the down-sampling path. 
+This package includes the code for the reconstruction task. We use a complex valued neural network based on the k-Strip architecture. Additionally, we implemented a data consistency layer in the down-sampling path.
 
 ## Usage
 
@@ -32,7 +32,7 @@ usage: test_model.py [-h] [-m MODEL_PATH] -i DATA_PATH
 
 options:
   -h, --help            show this help message and exit
-  -m                    Path to the model to be tested. 
+  -m                    Path to the model to be tested.
                         If None is selected, zerofilling will be tested.
   -i                    Path to the test data.
 ```

@@ -1,3 +1,6 @@
+[![Python 3.12.4](https://img.shields.io/badge/python-3.12.4-blue.svg)](https://www.python.org/downloads/release/python-3124/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+<img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=Pytorch&logoColor=white"/></a>
 # PhaseGen
 
 <div align="center">
@@ -13,23 +16,23 @@ Each package has its own documentation. You are able to run each package as a st
 
 ## Usage
 
-For more detailed instructions, please find the documentation in each workpackage. 
+For more detailed instructions, please find the documentation in each workpackage.
 
 ### Installation via Git
 
 1. Clone repository:
-   
+
        git clone https://github.com/TIO-IKIM/PhaseGen.git
 
 2. Create a conda environment with Python version 3.12.4 and install the necessary dependencies:
-   
+
        cd PhaseGen
        conda create -n my_env python=3.12.4
-      ```        
+      ```  
       conda activate my_env
       pip install -r requirements.txt
       ```
-      
+
 ## Roadmap
 
 ## Citation

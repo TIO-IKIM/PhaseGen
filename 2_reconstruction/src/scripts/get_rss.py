@@ -1,17 +1,23 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import torch
 from glob import glob
 from pathlib import Path
 from tqdm import tqdm
 import concurrent.futures
 
-    
+
 def get_files(input_path, save_path):
     gen_data_list = glob(f"{save_path}/*.pt")
     gen_data_list.sort()
     data_list = glob(f"{input_path}/*.pt")
     data_list.sort()
-    
+
     return data_list, gen_data_list
+
 
 def process_file(file, gen_data_list, save_path):
     filename = Path(file).stem
@@ -20,23 +26,23 @@ def process_file(file, gen_data_list, save_path):
     gen_data = torch.load(gen_file, weights_only=True)
     while isinstance(gen_data, dict) is True:
         gen_data = gen_data["kspace"]
-    gen_data_new = { 
-        'kspace': gen_data,
-        'reconstruction_rss': data['reconstruction_rss'],
+    gen_data_new = {
+        "kspace": gen_data,
+        "reconstruction_rss": data["reconstruction_rss"],
     }
     torch.save(gen_data_new, f"{save_path}/{filename}.pt")
-        
+
+
 if __name__ == "__main__":
-    
     input_path = "/path/to/input"
     save_path = "/path/to/save"
-    
-    data_list, gen_data_list = get_files(
-        input_path=input_path,
-        save_path=save_path
-    )
+
+    data_list, gen_data_list = get_files(input_path=input_path, save_path=save_path)
     with tqdm(total=len(data_list)) as pbar:
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            futures = [executor.submit(process_file, file, gen_data_list, save_path) for file in data_list]
+            futures = [
+                executor.submit(process_file, file, gen_data_list, save_path)
+                for file in data_list
+            ]
             for future in concurrent.futures.as_completed(futures):
                 pbar.update(1)

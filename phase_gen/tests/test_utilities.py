@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import os
 import sys
 
@@ -10,11 +15,18 @@ from unittest.mock import MagicMock
 import torch
 from utils.utilities import EarlyStopping, padding
 
-class TestUtilities(unittest.TestCase):
 
+class TestUtilities(unittest.TestCase):
     def test_early_stopping(self):
         logger = MagicMock()
-        early_stopping = EarlyStopping(patience=3, verbose=True, delta=0.1, monitor="val_loss", op_type="min", logger=logger)
+        early_stopping = EarlyStopping(
+            patience=3,
+            verbose=True,
+            delta=0.1,
+            monitor="val_loss",
+            op_type="min",
+            logger=logger,
+        )
 
         # Test improvement
         early_stopping(1.0)
@@ -37,5 +49,6 @@ class TestUtilities(unittest.TestCase):
         padded = padding(pooled_input, original)
         self.assertEqual(padded.size(), original.size())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
