@@ -68,18 +68,18 @@ Toggle the lists below to see an overview of implemented layer, blocks and activ
 
 ## Getting started
 1. Clone repository:
-   
+
        git clone https://github.com/TIO-IKIM/k-Strip.git
    >Note: The training & testing scripts expect the repository to be saved directly in the home directory (```Path.home()```). If this is not the case, you just need to insert the correct path in the scripts.
 2. Create a conda environment with Python version 3.11.2 and install the necessary dependencies:
-   
+
        conda create --name k-strip python=3.11.2 --file requirements.txt
     In case of installation issues with conda, use pip install -r requirements.txt to install the dependecies.
     >Note: The PyTorch version used needs CuDA 11.7 installed. You can change the PyTorch version in the requirements file.
 3. Activate your new environment:
 
        conda activate k-strip
-   
+
 4. Insert all necesarry paths to your training / testing data in the config files in ```src/configs``` and you should be all set to start training your own CVNN!
    > Note: The training config is already filled with the settings used for our publication, but you can change all parameters as you wish ... until you break it.
 

@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import torch
 import torch.nn.functional as F
 from models.cResUNet import ResUNet
@@ -5,7 +10,6 @@ import math
 
 
 class PhaseDiffusionUNet(ResUNet):
-
     def __init__(
         self,
         config,

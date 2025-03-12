@@ -63,7 +63,6 @@ def set_seed(seed: int = 42) -> None:
 
 
 class TrainNetwork:
-
     def __init__(self, args: dict, config: dict) -> None:
         """
         Initializes the TrainNetwork class with the given arguments and configuration.
@@ -225,7 +224,7 @@ class TrainNetwork:
                 num=self.val_num,
                 folder=self.save_folder,
             )
-        stop_metric = metrics['val_loss']
+        stop_metric = metrics["val_loss"]
         self.early_stopping(stop_metric)
         if self.early_stopping.early_stop:
             logger.info("Early stopping")
@@ -238,14 +237,12 @@ class TrainNetwork:
         folds = Folds(csv_path=self.csv_path, n_folds=5)
 
         for self.fold_idx, fold in enumerate(folds):
-
             logger.info(f"---- Fold {self.fold_idx + 1} of {len(folds)} ----")
 
             self.save_folder = Path(self.save_base_folder) / f"fold_{self.fold_idx}"
             # Log save folder information
             logger.info(f"Save folder: {str(self.save_folder)}")
             Path(self.save_folder).mkdir(parents=True, exist_ok=True)
-
 
             self.early_stopping = utilities.EarlyStopping(
                 patience=30,
@@ -315,6 +312,7 @@ class TrainNetwork:
                     logger.info("Save checkpoint.")
 
             torch.save(self.model, f"{Path(self.save_folder)}/last_checkpoint.pth")
+
 
 if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True

@@ -7,7 +7,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.fourier import ifft, fft
 
 
 class ComplexELU(nn.Module):
@@ -436,30 +435,32 @@ class cLogReLU(nn.Module):
             torch.Tensor: The complex-valued output tensor after applying the cLogReLU activation function.
         """
         return torch.log(self.relu(x))
-    
+
 
 class PhaseSensitiveReLU(nn.Module):
     def __init__(self, threshold=0.1):
         super(PhaseSensitiveReLU, self).__init__()
         self.threshold = threshold
-        
+
     def forward(self, x):
-        #magnitude = torch.abs(x)
-        #phase = torch.angle(x)
-        #activated_magnitude = torch.where(magnitude > self.threshold, magnitude, torch.zeros_like(magnitude))
-        #return activated_magnitude * torch.exp(1j * phase)
+        # magnitude = torch.abs(x)
+        # phase = torch.angle(x)
+        # activated_magnitude = torch.where(magnitude > self.threshold, magnitude, torch.zeros_like(magnitude))
+        # return activated_magnitude * torch.exp(1j * phase)
         return x
+
 
 class SineReLU(nn.Module):
     def __init__(self):
         super(SineReLU, self).__init__()
-        
+
     def forward(self, x):
         return torch.sin(x.real) + 1j * torch.sin(x.imag)
-    
+
+
 class Linear(nn.Module):
     def __init__(self):
         super(Linear, self).__init__()
-        
+
     def forward(self, x):
         return x

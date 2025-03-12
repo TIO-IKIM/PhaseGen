@@ -14,7 +14,6 @@ from torchvision import transforms
 
 
 class CreateDataset:
-
     def __init__(
         self,
         data_csv,

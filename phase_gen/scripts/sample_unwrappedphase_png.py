@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import torch
 import os
 from tqdm import tqdm
@@ -8,6 +13,7 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 
+
 class CreateDataset:
     def __init__(
         self,
@@ -16,24 +22,24 @@ class CreateDataset:
         self.data_path = data_path
 
     def __len__(self):
-
         return len(self.data_path)
 
     def __getitem__(self, idx):
-        
         data_path = self.data_path[idx]
-        
-        assert data_path.endswith('.pt') or data_path.endswith('.npy'), "Data should be in .pt or .np format"
-        
-        if data_path.endswith('.pt'):
+
+        assert data_path.endswith(".pt") or data_path.endswith(
+            ".npy"
+        ), "Data should be in .pt or .np format"
+
+        if data_path.endswith(".pt"):
             self.x = torch.load(data_path, weights_only=False).cfloat()
-        elif data_path.endswith('.npy'):
+        elif data_path.endswith(".npy"):
             self.x = torch.tensor(np.load(data_path)).cfloat()
-            data_path = data_path.replace('.npy', '.pt')
-        
+            data_path = data_path.replace(".npy", ".pt")
+
         self.x = ifft(self.x)
-        
-        if self.x.ndim == 2:    
+
+        if self.x.ndim == 2:
             self.x = self.x[None, ...]
 
         return self.x, data_path
@@ -44,8 +50,8 @@ class CreateDataset:
 """https://github.com/blakedewey/phase_unwrap/blob/main/phase_unwrap/cli.py"""
 GAUSS_STDEV = 10.0
 
+
 def unwrap_phase(phase_obj):
-    
     print("Unwrapping phase image.")
     phase_data = torch.tensor(phase_obj)
     if phase_data.max() > torch.pi:
@@ -58,13 +64,15 @@ def unwrap_phase(phase_obj):
 
     dim = norm_phase.shape
     tmp = np.array(
-        np.array(range(int(np.floor(-dim[1] / 2)), int(np.floor(dim[1] / 2)))) / float(dim[1])
+        np.array(range(int(np.floor(-dim[1] / 2)), int(np.floor(dim[1] / 2))))
+        / float(dim[1])
     )
     tmp = tmp.reshape((1, dim[1]))
     uu = np.ones((1, dim[0]))
     xx = np.dot(tmp.conj().T, uu).conj().T
     tmp = np.array(
-        np.array(range(int(np.floor(-dim[0] / 2)), int(np.floor(dim[0] / 2)))) / float(dim[0])
+        np.array(range(int(np.floor(-dim[0] / 2)), int(np.floor(dim[0] / 2))))
+        / float(dim[0])
     )
     tmp = tmp.reshape((1, dim[0]))
     uu = np.ones((dim[1], 1))
@@ -101,11 +109,14 @@ def unwrap_phase(phase_obj):
 
     return filter_phase
 
+
 def cfft(img_array: np.ndarray) -> np.ndarray:
     return np.fft.fftshift(np.fft.fft2(np.fft.fftshift(img_array)))
 
+
 def icfft(freq_array: np.ndarray) -> np.ndarray:
     return np.fft.fftshift(np.fft.ifft2(np.fft.fftshift(freq_array)))
+
 
 def gauss_filter(dimx: int, stdevx: float, dimy: int, stdevy: float) -> np.ndarray:
     if dimx % 2 == 0:
@@ -124,6 +135,7 @@ def gauss_filter(dimx: int, stdevx: float, dimy: int, stdevy: float) -> np.ndarr
     h /= h.max()
     return h
 
+
 def gauss(r: np.ndarray, std0: float) -> np.ndarray:
     return np.exp(-(r**2) / (2 * (std0**2))) / (std0 * np.sqrt(2 * np.pi))
 
@@ -132,20 +144,23 @@ def get_data_list(data_path, save_path):
     data_list = glob(f"{data_path}/*")
     existing_files = set(os.path.basename(f) for f in glob(f"{save_path}/*"))
     data_list = [f for f in data_list if os.path.basename(f) not in existing_files]
-    
+
     return data_list
 
+
 def load_model(model_path, device):
-    
-    model = torch.load(f"{model_path}/model.pth", map_location=device, weights_only=False)
+    model = torch.load(
+        f"{model_path}/model.pth", map_location=device, weights_only=False
+    )
     model.to(device)
     model.eval()
-        
+
     return model
+
 
 def get_data_loader(data_path, batch_size):
     test_ds = CreateDataset(data_path=data_path)
-    
+
     test_loader = DataLoader(
         test_ds,
         batch_size=batch_size,
@@ -154,17 +169,18 @@ def get_data_loader(data_path, batch_size):
         prefetch_factor=4,
         pin_memory=True,
     )
-    
+
     return test_loader
-    
+
+
 def main(data_path, save_path_genphase, save_path_orig_phase, device):
     data_list = get_data_list(data_path, save_path_genphase)
     model = load_model(model_path, device)
-    
+
     data_loader = get_data_loader(data_list, 64)
-    
+
     loop = tqdm(data_loader, desc="Processing batches")
-    
+
     for i, (x, path) in enumerate(loop):
         x = x.to(device)
         with torch.no_grad():
@@ -178,24 +194,34 @@ def main(data_path, save_path_genphase, save_path_orig_phase, device):
                     if i == 0:
                         data_with_phase_stack = data_with_phase.unsqueeze(1)
                     else:
-                        data_with_phase_stack = torch.cat((data_with_phase_stack, data_with_phase.unsqueeze(1)), dim=1)
+                        data_with_phase_stack = torch.cat(
+                            (data_with_phase_stack, data_with_phase.unsqueeze(1)), dim=1
+                        )
                 data_with_phase = data_with_phase_stack
-        
+
         for i in range(data_with_phase.shape[0]):
             # unwrap the phase
-            data_with_phase_unwrapped = unwrap_phase(data_with_phase.angle().squeeze()[i].cpu().numpy())
+            data_with_phase_unwrapped = unwrap_phase(
+                data_with_phase.angle().squeeze()[i].cpu().numpy()
+            )
             x_phase_unwrapped = unwrap_phase(x.angle().squeeze()[i].cpu().numpy())
 
-            plt.imsave(Path(save_path_genphase, Path(path[i]).stem + ".png"), data_with_phase_unwrapped)
-            plt.imsave(Path(save_path_orig_phase, Path(path[i]).stem + ".png"), x_phase_unwrapped)
-        
+            plt.imsave(
+                Path(save_path_genphase, Path(path[i]).stem + ".png"),
+                data_with_phase_unwrapped,
+            )
+            plt.imsave(
+                Path(save_path_orig_phase, Path(path[i]).stem + ".png"),
+                x_phase_unwrapped,
+            )
+
+
 if __name__ == "__main__":
-    
     model_path = "/Path/to/model"
     data_path = "/Path/to/data"
     save_path_genphase = "/Path/to/save/gen_phase_unwrapped"
     save_path_orig_phase = "/Path/to/save/orig_phase_unwrapped"
-    
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     main(data_path, save_path_genphase, save_path_orig_phase, device)

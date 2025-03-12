@@ -163,14 +163,14 @@ class ResUNet(nn.Module):
                 padding=0,
                 bias=True,
                 device=self.device,
-                dtype=torch.cfloat
+                dtype=torch.cfloat,
             ),
         )
-        
+
     def get_mask(self, x_in):
         mask = (x_in.abs() > 0).float()
         return mask
-        
+
     def data_consistency(self, x_pred, x_in):
         """Data consistency layer for the model.
 
@@ -184,22 +184,21 @@ class ResUNet(nn.Module):
         if self.image_domain:
             x_pred = fft(x_pred)
         mask = self.get_mask(x_in)
-        
+
         # Scale x_in and x_pred
         x_in = x_in * mask
         x_pred = x_pred * (1 - mask)
-        
+
         scale_factor = (x_pred.abs().mean() + 1e-6) / (x_in.abs().mean() + 1e-6)
         x_in = x_in * scale_factor
 
         x_out = x_in + x_pred
         if self.image_domain:
             x_out = ifft(x_out)
-            
+
         return x_out
 
     def forward(self, x, kspace_undersampled):
-
         skip_connections = []
         cut_offs = []
         if self.consistency:
@@ -210,7 +209,7 @@ class ResUNet(nn.Module):
         # Downsample blocks
         for idx, down in enumerate(self.downs):
             x = down(x)
-            
+
             # Save intermediate outputs after downsampling
             if idx % (self.res_length + 1) == 0:
                 skip_connections.append(x)
@@ -222,7 +221,7 @@ class ResUNet(nn.Module):
                     x = ifft(x)
                 if self.consistency:
                     x_in, _ = self.pool(x_in)
-                    x_in_list.append(x_in) 
+                    x_in_list.append(x_in)
                     x = self.data_consistency(x, x_in)
                 cut_offs.append(cut_off)
 

@@ -106,7 +106,6 @@ def plot_singlecoil_example(
     save_path: Union[str, Path],
     image_domain: bool,
 ) -> None:
-
     # plot 4 examples of input in image domain
     fig, axs = plt.subplots(2, 2, figsize=(10, 10))
     input_image = input_image.squeeze()
@@ -212,7 +211,6 @@ def padding(pooled_input, original):
 
 
 def normalize(gt, pred):
-
     gt = (gt - gt.min()) / (gt.max() - gt.min())
     pred = (pred - pred.min()) / (pred.max() - pred.min())
 

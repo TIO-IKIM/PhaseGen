@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Author: Moritz Rempe, Institute for AI in medicine, moritz.rempe@uk-essen.de
-"""
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 from pathlib import Path
 import os, sys
 import h5py
-import numpy as np
 import torch
 import torchvision.transforms as T
 from tqdm import tqdm
@@ -37,6 +37,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class BrainSave:
     """Class to save brain MRI data in h5-format as .pt files.
 
@@ -66,8 +67,10 @@ class BrainSave:
         self.file_paths = glob(self.fastMRI_path + "/*.h5")
         existing_files = glob(str(self.save_path) + "/*.pt")
         existing_files = [Path(file).name.split("_")[0] for file in existing_files]
-        
-        self.file_paths = [file for file in self.file_paths if Path(file).stem not in existing_files]
+
+        self.file_paths = [
+            file for file in self.file_paths if Path(file).stem not in existing_files
+        ]
 
     @staticmethod
     def load_h5(file_path: str) -> tuple[torch.Tensor, torch.Tensor]:
@@ -116,7 +119,7 @@ class BrainSave:
 
     @staticmethod
     def save_slice(volume_kspace, volume_recon, file_path):
-        """Saves slices of k-space and reconstruction data in one file as dictionary 
+        """Saves slices of k-space and reconstruction data in one file as dictionary
         with the keys 'kspace' and 'reconstruction_rss'.
 
         Args:
@@ -132,7 +135,7 @@ class BrainSave:
                 torch.save(
                     {
                         "kspace": torch.clone(volume_kspace[slice].detach()),
-                        "reconstruction_rss": None
+                        "reconstruction_rss": None,
                     },
                     str(file_path) + f"_slice_{slice}.pt",
                 )
@@ -149,11 +152,10 @@ class BrainSave:
                 )
 
     def __call__(self, *args, **kwds):
-
         logging.info(f"Loading files from {self.fastMRI_path} ...")
         self.get_file_paths()
         logging.info(f"Found {len(self.file_paths)} volumes.")
-        
+
         logging.info(f"Saving files to {self.save_path} ...")
 
         for file_path in tqdm(self.file_paths):
@@ -170,5 +172,5 @@ class BrainSave:
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    brain_save = BrainSave(args.input_path, args.output_path) 
+    brain_save = BrainSave(args.input_path, args.output_path)
     brain_save()

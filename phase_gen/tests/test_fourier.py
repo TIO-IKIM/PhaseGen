@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+# @ Moritz Rempe, moritz.rempe@uk-essen.de
+# Institute for Artifical Intelligence in Medicine,
+# University Medicine Essen
 import os
 import sys
 
@@ -9,8 +14,8 @@ import torch
 import unittest
 from utils.fourier import ifft, fft
 
-class TestFourierTransforms(unittest.TestCase):
 
+class TestFourierTransforms(unittest.TestCase):
     def test_fft_2d(self):
         scan = torch.randn(4, 4)
         transformed = fft(scan)
@@ -51,5 +56,6 @@ class TestFourierTransforms(unittest.TestCase):
         transformed = ifft(scan)
         self.assertEqual(transformed.shape, scan.shape)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
