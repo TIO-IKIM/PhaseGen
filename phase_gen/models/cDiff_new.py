@@ -19,7 +19,7 @@ class PhaseDiffusionUNet(ResUNet):
         dilation: int = 1,
         in_channels: int = 2,
         out_channels: int = 1,
-        timesteps=1000,
+        timesteps=10,
     ):
         """
         Initializes the PhaseDiffusionUNet.
@@ -179,6 +179,7 @@ class PhaseDiffusionUNet(ResUNet):
         5. In each iteration, generates a noise tensor with random angles and updates `x_t` using the `_reverse_diffusion` method.
         6. Finally, returns the input tensor multiplied by a complex exponential of the angles of `x_t`.
         """
+
         input = input.abs().float()
         input_whitened = (input - input.mean(dim=[1, 2, 3], keepdim=True)) / input.std(
             dim=[1, 2, 3], keepdim=True
