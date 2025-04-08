@@ -24,15 +24,15 @@ argparser.add_argument(
     "-m",
     "--model_path",
     type=str,
-    required=True,
-    help="Path to the model directory",
+    default=None,
+    help="Path to the model directory. Only use this if you use other models than the one provided in the repo or you move them to another directory.",
 )
 argparser.add_argument(
     "-i",
     "--data_path",
     type=str,
     required=True,
-    help="Path to the data directory. Data needs to be in .pt or .npy format.",
+    help="Path to the data directory. This can be a single file or a directory.",
 )
 argparser.add_argument(
     "-o",
@@ -40,6 +40,18 @@ argparser.add_argument(
     type=str,
     required=True,
     help="Path to the save directory.",
+)
+argparser.add_argument(
+    "-s",
+    "--fast",
+    action="store_true",
+    help="Use fast sampling mode. This will use the diffusion model with 100 steps instead of 1000 steps. Defaults to False.",
+)
+argparser.add_argument(
+    "-c",
+    "--cpu",
+    action="store_true",
+    help="Use CPU for sampling. This will increase sampling time drastically. Defaults to False.",
 )
 
 
@@ -106,7 +118,15 @@ class Sampler:
     """
 
     def __init__(
-        self, data_path, save_path, model_path, device, batch_size, kspace: bool = False
+        self,
+        data_path,
+        save_path,
+        device,
+        batch_size,
+        model_path: str = None,
+        kspace: bool = False,
+        fast_mode: bool = False,
+        cpu_mode: bool = False,
     ):
         """
         Initializes the Sampler with the given parameters.
@@ -116,6 +136,10 @@ class Sampler:
             save_path (str): Path to the save directory.
             device (torch.device): Device to run the model on.
             batch_size (int): Batch size for the data loader.
+            model_path (str): Path to the model directory. Defaults to None.
+            kspace (bool): Whether to use k-space data. Defaults to False.
+            fast_mode (bool): Whether to use fast sampling model. Defaults to False.
+            cpu_mode (bool): Whether to use CPU for sampling. Defaults to False.
         """
         self.data_path = data_path
         self.save_path = save_path
@@ -123,6 +147,8 @@ class Sampler:
         self.device = device
         self.batch_size = batch_size
         self.kspace = kspace
+        self.fast_mode = fast_mode
+        self.cpu_mode = cpu_mode
         self._get_data_list()
         self._load_model()
         self._get_data_loader()
@@ -146,9 +172,22 @@ class Sampler:
         """
         Loads the model from the model path and sets it to evaluation mode.
         """
+        if self.model_path is None:
+            if self.fast_mode:
+                logger.info("Using fast sampling mode.")
+                self.model_path = "models/model_100steps.pth"
+            else:
+                logger.info("Using normal sampling mode.")
+                self.model_path = "models/model.pth"
+        logger.debug(f"Loading model from {self.model_path}")
+
         self.model = torch.load(
             self.model_path, map_location=self.device, weights_only=False
         )
+
+        if self.cpu_mode:
+            self.model.device = "cpu"
+            self.model.model.device = "cpu"
 
         self.model.to(self.device)
 
@@ -221,6 +260,8 @@ if __name__ == "__main__":
     model_path = args.model_path
     data_path = args.data_path
     save_path = args.save_path
+    fast_mode = args.fast
+    cpu_mode = args.cpu
 
     ikim_logger = IKIMLogger(
         level="INFO",
@@ -229,7 +270,22 @@ if __name__ == "__main__":
     )
     logger = ikim_logger.create_logger()
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if cpu_mode:
+        device = torch.device("cpu")
+        logger.info(
+            "Using CPU for sampling. This will increase sampling time drastically."
+        )
+    else:
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    sampler = Sampler(data_path, save_path, model_path, device, 1, kspace=False)
+    sampler = Sampler(
+        data_path,
+        save_path,
+        device,
+        batch_size=1,
+        model_path=model_path,
+        kspace=False,
+        fast_mode=fast_mode,
+        cpu_mode=cpu_mode,
+    )
     sampler()
