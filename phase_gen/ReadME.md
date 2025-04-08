@@ -55,8 +55,10 @@ python sample_phase.py [flag]
 
 ### Command Line Arguments
 
-| Argument            | Type | Default               | Description                                             |
-|---------------------|------|-----------------------|---------------------------------------------------------|
-| `-m`                | str  | `None`                | Path to the model directory.                            |
-| `-i`                | str  | `None`                | Path to the data directory. Data needs to be in .pt or .npy format.  |
-| `-p`                | str  | `None`                | Path to the save directory. tqdm.              |
+| Argument            | Type | Default               | Required | Description                                             |
+|---------------------|------|-----------------------|----------|---------------------------------------------------------|
+| `-i`                | str  | `None`                | Yes      | Path to the data directory. This can be a single file or a directory.directory. Data needs to be in .pt or .npy format. |
+| `-o`                | str  | `None`                | Yes      | Path to the save directory. |
+| `-m`                | str  | `None`                | No       | Path to the model directory. Only use this if you use other models than the one provided in the repo or you move them to another directory. |
+| `-s`             | bool  | `False`                   | No       | Use fast sampling mode. This will use the diffusion model with 100 steps instead of 1000 steps. Enabling this greatly improves sampling time but may lead to less accurate results. Defaults to False. |
+| `-c`                | bool  | `False`                   | No       | Use CPU for sampling. This will increase sampling time drastically. Defaults to False. |

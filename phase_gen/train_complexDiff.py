@@ -7,7 +7,7 @@ import os
 import torch
 import argparse
 from pathlib import Path
-import models.cDiff as cDiff_new
+import models.cDiff_new as cDiff
 import torch.optim as optim
 from tqdm import tqdm
 from utils.IKIMLogger import IKIMLogger
