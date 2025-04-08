@@ -33,6 +33,8 @@ For more detailed instructions, please find the documentation in each workpackag
       pip install -r requirements.txt
       ```
 
+3. Torch is already included in the requirements.txt file. Nevertheless, you should install it separately to ensure that the correct version is installed. You can find the appropriate command for your system at [PyTorch](https://pytorch.org/get-started/locally/).
+
 ## Roadmap
 
 ## Citation
