@@ -4,13 +4,16 @@
 # Institute for Artifical Intelligence in Medicine,
 # University Medicine Essen
 import torch
-import os
+import os, sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from tqdm import tqdm
 from utils.fourier import ifft, fft
 from glob import glob
 from torch.utils.data import DataLoader
 import argparse
 import numpy as np
+import nibabel as nib
+from utils.IKIMLogger import IKIMLogger
 
 argparser = argparse.ArgumentParser(
     prog="sample_phase.py",
@@ -31,7 +34,11 @@ argparser.add_argument(
     help="Path to the data directory. Data needs to be in .pt or .npy format.",
 )
 argparser.add_argument(
-    "-o", "--save_path", type=str, required=True, help="Path to the save directory."
+    "-o", 
+    "--save_path", 
+    type=str, 
+    required=True, 
+    help="Path to the save directory.",
 )
 
 
@@ -45,9 +52,11 @@ class CreateDataset:
 
     def __init__(
         self,
-        data_path,
+        data_path: str,
+        kspace: bool = False
     ):
         self.data_path = data_path
+        self.kspace = kspace
 
     def __len__(self):
         return len(self.data_path)
@@ -65,16 +74,18 @@ class CreateDataset:
 
         data_path = self.data_path[idx]
 
-        assert data_path.endswith(".pt") or data_path.endswith(
-            ".npy"
-        ), "Data should be in .pt or .npy format"
-
         if data_path.endswith(".pt"):
             self.x = torch.load(data_path, weights_only=False)
         elif data_path.endswith(".npy"):
             self.x = torch.tensor(np.load(data_path))
             data_path = data_path.replace(".npy", ".pt")
-        self.x = ifft(self.x).abs()
+        elif data_path.endswith(".nii.gz"):
+            self.x = torch.tensor(nib.load(data_path).get_fdata())
+            self.x = torch.permute(self.x, (2,0,1))
+            data_path = data_path.replace(".nii.gz", ".pt")
+        
+        if self.kspace:
+            self.x = ifft(self.x).abs()
 
         if self.x.ndim == 2:
             self.x = self.x[None, ...]
@@ -97,7 +108,7 @@ class Sampler:
         data_loader (DataLoader): Data loader for the given data list.
     """
 
-    def __init__(self, data_path, save_path, model_path, device, batch_size):
+    def __init__(self, data_path, save_path, model_path, device, batch_size, kspace: bool = False):
         """
         Initializes the Sampler with the given parameters.
 
@@ -112,6 +123,7 @@ class Sampler:
         self.model_path = model_path
         self.device = device
         self.batch_size = batch_size
+        self.kspace = kspace
         self._get_data_list()
         self._load_model()
         self._get_data_loader()
@@ -120,7 +132,9 @@ class Sampler:
         """
         Retrieves a list of data files to process and filters out existing files in the save directory.
         """
-        data_list = glob(f"{self.data_path}/*")
+        data_list = []
+        for ext in ["**/*.pt", "**/*.npy", "**/*.nii.gz"]:
+            data_list.extend(glob(f"{self.data_path}/{ext}", recursive=True))
         existing_files = set(os.path.basename(f) for f in glob(f"{self.save_path}/*"))
         self.data_list = [
             f for f in data_list if os.path.basename(f) not in existing_files
@@ -133,54 +147,64 @@ class Sampler:
         self.model = torch.load(
             self.model_path, map_location=self.device, weights_only=False
         )
+
         self.model.to(self.device)
-        self.model.eval()
 
     def _get_data_loader(self):
         """
         Creates a data loader for the given data list.
         """
-        test_ds = CreateDataset(data_path=self.data_list)
+        test_ds = CreateDataset(data_path=self.data_list, kspace=self.kspace)
 
         self.data_loader = DataLoader(
             test_ds,
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=4,
-            prefetch_factor=4,
-            pin_memory=True,
+            num_workers=2,
+            prefetch_factor=1,
+            pin_memory=False,
         )
 
     def __call__(self):
         """
         Processes the data and saves the phase images.
         """
-        loop = tqdm(self.data_loader, desc="Processing batches")
-
-        for i, (x, path) in enumerate(loop):
-            x = x.to(self.device)
+        logger.info(f"Sampling {len(self.data_list)} files ({len(self.data_loader)} batches).")
+        
+        for x, path in tqdm(self.data_loader, desc="Processing batches"):
+            x = x.to(self.device, memory_format=torch.channels_last)
             with torch.no_grad():
-                if x.shape[1] == 1:
-                    data_with_phase = self.model.sample(x)
+                if x.shape[1] > 1:
+                    data_with_phase = torch.cat([
+                        self.model.sample(x[:, i, ...].unsqueeze(1)).unsqueeze(1)
+                        for i in range(x.shape[1])
+                    ], dim=1)
                 else:
-                    for i in range(x.shape[1]):
-                        data_with_phase = self.model.sample(x[:, i, ...].unsqueeze(1))
-                        if torch.isnan(data_with_phase).any():
-                            data_with_phase[torch.isnan(data_with_phase)] = 0
-                        if i == 0:
-                            data_with_phase_stack = data_with_phase.unsqueeze(1)
-                        else:
-                            data_with_phase_stack = torch.cat(
-                                (data_with_phase_stack, data_with_phase.unsqueeze(1)),
-                                dim=1,
-                            )
-                    data_with_phase = data_with_phase_stack
+                    data_with_phase = self.model.sample(x)
 
-            data_fft = fft(data_with_phase.squeeze().detach().cpu())
-            torch.save(
-                data_fft.clone(),
-                os.path.join(self.save_path, os.path.basename(path[0])),
-            )
+                data_with_phase[torch.isnan(data_with_phase)] = 0
+
+            data_with_phase = fft(data_with_phase.squeeze()) if self.kspace else data_with_phase.squeeze()
+            data_with_phase = data_with_phase.detach().cpu()
+
+            if data_with_phase.ndim == 3:
+                torch.save(
+                    data_with_phase.clone(),
+                    os.path.join(self.save_path, os.path.basename(path[0])),
+                )
+                logger.info(
+                    f"Saved {os.path.basename(path[0])} to {self.save_path}"
+                )
+            else:
+                for j in range(x.shape[0]):
+                    torch.save(
+                        data_with_phase[j].clone(),
+                        os.path.join(self.save_path, os.path.basename(path[j])),
+                    )
+                    logger.info(
+                        f"Saved {os.path.basename(path[j])} to {self.save_path}"
+                    )
+        logger.info("---- Finished sampling ----.")
 
 
 if __name__ == "__main__":
@@ -188,8 +212,15 @@ if __name__ == "__main__":
     model_path = args.model_path
     data_path = args.data_path
     save_path = args.save_path
+    
+    ikim_logger = IKIMLogger(
+        level="INFO",
+        log_dir="logs",
+        comment="phase_sampling_batch7",
+    )
+    logger = ikim_logger.create_logger()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    sampler = Sampler(data_path, save_path, model_path, device, 64)
+    sampler = Sampler(data_path, save_path, model_path, device, 1, kspace=False)
     sampler()

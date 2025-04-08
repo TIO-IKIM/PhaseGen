@@ -1,3 +1,8 @@
 *.pyc
 *.DS_Store
 .ruff_cache
+phase_gen/test.png
+.gitignore
+*.pth
+*.pt
+*.log*
