@@ -37,4 +37,6 @@ For more detailed instructions, please find the documentation in each workpackag
 
 ## Roadmap
 
+Model weights of PhaseGen will be uploaded soon. Until then the weights are available upon request. 
+
 ## Citation
