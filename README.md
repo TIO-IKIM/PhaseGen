@@ -1,6 +1,7 @@
 [![Python 3.12.4](https://img.shields.io/badge/python-3.12.4-blue.svg)](https://www.python.org/downloads/release/python-3124/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=Pytorch&logoColor=white"/></a>
+[![arXiv](https://img.shields.io/badge/arXiv-2501.05269-b31b1b.svg)](https://arxiv.org/abs/2504.07560)
 # PhaseGen
 
 <div align="center">
@@ -40,3 +41,15 @@ For more detailed instructions, please find the documentation in each workpackag
 Model weights of PhaseGen will be uploaded soon. Until then the weights are available upon request. 
 
 ## Citation
+
+```
+@misc{rempe2025phasegendiffusionbasedapproachcomplexvalued,
+      title={PhaseGen: A Diffusion-Based Approach for Complex-Valued MRI Data Generation}, 
+      author={Moritz Rempe and Fabian Hörst and Helmut Becker and Marco Schlimbach and Lukas Rotkopf and Kevin Kröninger and Jens Kleesiek},
+      year={2025},
+      eprint={2504.07560},
+      archivePrefix={arXiv},
+      primaryClass={eess.IV},
+      url={https://arxiv.org/abs/2504.07560},
+}
+```
