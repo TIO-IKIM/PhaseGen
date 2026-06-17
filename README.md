@@ -36,15 +36,21 @@ For more detailed instructions, please find the documentation in each workpackag
 
 3. Torch is already included in the requirements.txt file. Nevertheless, you should install it separately to ensure that the correct version is installed. You can find the appropriate command for your system at [PyTorch](https://pytorch.org/get-started/locally/).
 
+## Qualitative Output of PhaseGen
+
+Below you can find a qualitative output of PhaseGen for the three different datasets used in our paper. The first column shows the magnitude input image. For better visualization we also show the unwrapped phase images in columns three and five.
+
+![Figure 2: Qualitative Output of PhaseGen](/Figures/phasegen_output.png)
+
 ## Roadmap
 
-Model weights of PhaseGen will be uploaded soon. Until then the weights are available upon request. 
+Model weights of PhaseGen will be uploaded soon. Until then the weights are available upon request.
 
 ## Citation
 
 ```
 @misc{rempe2025phasegendiffusionbasedapproachcomplexvalued,
-      title={PhaseGen: A Diffusion-Based Approach for Complex-Valued MRI Data Generation}, 
+      title={PhaseGen: A Diffusion-Based Approach for Complex-Valued MRI Data Generation},
       author={Moritz Rempe and Fabian Hörst and Helmut Becker and Marco Schlimbach and Lukas Rotkopf and Kevin Kröninger and Jens Kleesiek},
       year={2025},
       eprint={2504.07560},
